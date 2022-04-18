@@ -2,7 +2,8 @@
 
 Software Modelling project 1 notes:
 Question 1:
-Edit roll method in navigation pane to 
+Edit roll method in navigation pane to loop the animation and store overall dice roll in an attribute
+May also need to edit the Die class
 
 Question 2:
 Use connection between puppet and navigation pane to track whether nbsteps = num of dice
