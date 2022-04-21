@@ -130,4 +130,14 @@ public class GamePane extends GameGrid
     return (int)(a * y + b);
   }
 
+  public void swapConnections() {
+    for(int i=0;i<connections.size();i++) {
+      Connection currConnection = connections.get(i);
+      if(currConnection instanceof Snake) {
+        connections.set(i, new Snake(currConnection.cellEnd, currConnection.cellStart));
+      } else {
+        connections.set(i, new Ladder(currConnection.cellEnd, currConnection.cellStart));
+      }
+    }
+  }
 }

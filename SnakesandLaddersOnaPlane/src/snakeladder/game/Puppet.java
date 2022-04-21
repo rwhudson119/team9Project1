@@ -2,6 +2,7 @@ package snakeladder.game;
 
 import ch.aplu.jgamegrid.*;
 import java.awt.Point;
+import java.util.List;
 
 public class Puppet extends Actor
 {
@@ -9,6 +10,7 @@ public class Puppet extends Actor
   private NavigationPane navigationPane;
   private int cellIndex = 0;
   private int nbSteps;
+  private int turnSteps; // stores total steps taken in turn
   private Connection currentCon = null;
   private int y;
   private int dy;
@@ -46,6 +48,7 @@ public class Puppet extends Actor
       setLocation(gamePane.startLocation);
     }
     this.nbSteps = nbSteps;
+    this.turnSteps = nbSteps;
     setActEnabled(true);
   }
 
@@ -78,6 +81,39 @@ public class Puppet extends Actor
         setLocation(new Location(getX() - 1, getY()));
     }
     cellIndex++;
+  }
+
+  private void collisionDetect() {
+    List<Puppet> puppets = gamePane.getAllPuppets();
+    for (int i=0;i<gamePane.getNumberOfPlayers();i++) {
+      if(puppets.get(i) != this && puppets.get(i).getCellIndex() == cellIndex && cellIndex > 1) {
+        puppets.get(i).go(-1);
+      }
+    }
+  }
+
+  private void moveToPrevCell() {
+    int tens = cellIndex / 10;
+    int ones = cellIndex - tens * 10;
+    if(ones == 1) { // move down
+      setLocation(new Location(getX(), getY() + 1));
+    } else if (tens % 2 == 0)     // Cells starting left 01, 21, .. 81
+    {
+      if(ones == 0) {
+        setLocation(new Location(getX() + 1, getY()));
+      } else {
+        setLocation(new Location(getX() - 1, getY()));
+      }
+    }
+    else     // Cells starting left 20, 40, .. 100
+    {
+      if(ones == 0) {
+        setLocation(new Location(getX() - 1, getY()));
+      } else {
+        setLocation(new Location(getX() + 1, getY()));
+      }
+    }
+    cellIndex--;
   }
 
   public void act()
@@ -116,8 +152,7 @@ public class Puppet extends Actor
     }
 
     // Normal movement
-    if (nbSteps > 0)
-    {
+    if (nbSteps > 0) {
       moveToNextCell();
 
       if (cellIndex == 100)  // Game over
@@ -128,17 +163,24 @@ public class Puppet extends Actor
       }
 
       nbSteps--;
-      if (nbSteps == 0)
+    } else if (nbSteps == -1) {
+      moveToPrevCell(); //moves puppet back once, yet to be implemented.
+      nbSteps = 0; //sets nbSteps to 0 so act() can check rules of square.
+    }
+    if (nbSteps == 0)
       {
+        collisionDetect();
         // Check if on connection start
-        if ((currentCon = gamePane.getConnectionAt(getLocation())) != null)
+        if ((currentCon = gamePane.getConnectionAt(getLocation())) != null
+            && (turnSteps > navigationPane.getNumberOfDice() || currentCon.locEnd.y < currentCon.locStart.y))
         {
           gamePane.setSimulationPeriod(50);
           y = gamePane.toPoint(currentCon.locStart).y;
           if (currentCon.locEnd.y > currentCon.locStart.y)
             dy = gamePane.animationStep;
-          else
+          else {
             dy = -gamePane.animationStep;
+          }
           if (currentCon instanceof Snake)
           {
             navigationPane.showStatus("Digesting...");
@@ -152,11 +194,10 @@ public class Puppet extends Actor
         }
         else
         {
+          currentCon = null;
           setActEnabled(false);
           navigationPane.prepareRoll(cellIndex);
         }
       }
-    }
   }
-
 }

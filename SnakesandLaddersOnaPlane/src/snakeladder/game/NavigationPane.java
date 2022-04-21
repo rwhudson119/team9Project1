@@ -15,18 +15,41 @@ public class NavigationPane extends GameGrid
 {
   private class SimulatedPlayer extends Thread
   {
-    public void run()
-    {
-      while (true)
-      {
+    public void run() {
+      while (true) {
         Monitor.putSleep();
         handBtn.show(1);
-       roll(getDieValue());
+        roll(getDieValue());
         delay(1000);
         handBtn.show(0);
+        if(shouldToggle()) {
+          isToggle = !isToggle;
+          toggleCheck.setChecked(isToggle);
+          gp.swapConnections();
+        }
       }
     }
-
+    boolean shouldToggle() {
+      int optimal = 0;
+      java.util.List<Puppet> puppets = gp.getAllPuppets();
+      for(int i=0;i<gp.getNumberOfPlayers();i++) {
+        if(puppets.get(i) == gp.getPuppet()){
+          continue;
+        }
+        int currIndex = puppets.get(i).getCellIndex();
+        for(int j=1;j<=numberOfDice*6 && j+currIndex<100;j++) {
+          Location loc = new Location((currIndex+j)%10, (currIndex+j)/10);
+          Connection connection = gp.getConnectionAt(loc);
+          if(connection == null || connection.locStart != loc) { continue; }
+          if(connection.locEnd.getY() < connection.locStart.getY()) {
+            optimal++;
+          } else {
+            optimal--;
+          }
+        }
+      }
+      return optimal >= 0;
+    }
   }
 
   private final int DIE1_BUTTON_TAG = 1;
@@ -81,11 +104,12 @@ public class NavigationPane extends GameGrid
   private Properties properties;
   private java.util.List<java.util.List<Integer>> dieValues = new ArrayList<>();
   private GamePlayCallback gamePlayCallback;
+  private int numberOfDice;
 
   NavigationPane(Properties properties)
   {
     this.properties = properties;
-    int numberOfDice =  //Number of six-sided dice
+    numberOfDice =  //Number of six-sided dice
             (properties.getProperty("dice.count") == null)
                     ? 1  // default
                     : Integer.parseInt(properties.getProperty("dice.count"));
@@ -207,6 +231,7 @@ public class NavigationPane extends GameGrid
       @Override
       public void buttonChecked(GGCheckButton ggCheckButton, boolean checked) {
         isToggle = checked;
+        gp.swapConnections();
       }
     });
 
@@ -345,4 +370,9 @@ public class NavigationPane extends GameGrid
   public void checkAuto() {
     if (isAuto) Monitor.wakeUp();
   }
+
+  public int getNumberOfDice() {
+    return numberOfDice;
+  }
+
 }
