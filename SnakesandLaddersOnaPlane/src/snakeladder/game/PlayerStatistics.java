@@ -48,6 +48,7 @@ public class PlayerStatistics {
 		counter++;
 		for(int i = 1; i<arrayLength; i++) {
 			System.out.print(", " + counter + "-" + rollTotals[i]);
+			counter++;
 		}
 		System.out.print("\n");
 		System.out.println(playerName + " traversed: up-"+ traverseUp +", down-" + traverseDown);
