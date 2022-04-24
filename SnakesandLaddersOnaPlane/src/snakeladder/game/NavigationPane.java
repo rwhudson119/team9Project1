@@ -105,6 +105,10 @@ public class NavigationPane extends GameGrid
   private java.util.List<java.util.List<Integer>> dieValues = new ArrayList<>();
   private GamePlayCallback gamePlayCallback;
   private int numberOfDice;
+  private int currRoll = 0;
+  private int currTotal = 0;
+  
+  private java.util.List<PlayerStatistics> playerStats = new ArrayList<>();
 
   NavigationPane(Properties properties)
   {
@@ -294,6 +298,9 @@ public class NavigationPane extends GameGrid
       showResult("Game over");
       isGameOver = true;
       handBtn.setEnabled(true);
+      for(PlayerStatistics stats : playerStats) {
+    	  stats.printStatistics();
+      }
 
       java.util.List  <String> playerPositions = new ArrayList<>();
       for (Puppet puppet: gp.getAllPuppets()) {
@@ -323,10 +330,22 @@ public class NavigationPane extends GameGrid
 
   void startMoving(int nb)
   {
-    showStatus("Moving...");
-    showPips("Pips: " + nb);
-    showScore("# Rolls: " + (++nbRolls));
-    gp.getPuppet().go(nb);
+	  currTotal += nb;  
+	  showStatus("Moving...");
+	  showPips("Pips: " + nb);
+	  showScore("# Rolls: " + (++nbRolls));
+	  if(currRoll < numberOfDice) {
+	  	roll(getDieValue());
+	  } else {
+	  for (PlayerStatistics stats : playerStats) {
+	    if(stats.getPlayerName() == gp.getPuppet().getPuppetName()) {
+		  stats.addRoll(currTotal);
+		}
+	  }
+	  gp.getPuppet().go(currTotal);
+	  currTotal = 0;
+	  currRoll = 0;
+	}
   }
 
   void prepareBeforeRoll() {
@@ -347,6 +366,7 @@ public class NavigationPane extends GameGrid
 
   private void roll(int rollNumber)
   {
+	currRoll++;
     int nb = rollNumber;
     if (rollNumber == RANDOM_ROLL_TAG) {
       nb = ServicesRandom.get().nextInt(6) + 1;
@@ -373,6 +393,25 @@ public class NavigationPane extends GameGrid
 
   public int getNumberOfDice() {
     return numberOfDice;
+  }
+  public void addPlayerStats(String playerName) {
+	playerStats.add(new PlayerStatistics(playerName, numberOfDice));
+  }
+  
+  public void addTraverseUp() {
+	for (PlayerStatistics stats : playerStats) {
+	  if(stats.getPlayerName() == gp.getPuppet().getPuppetName()) {
+		stats.addUp();
+	  }
+	}
+  }
+  
+  public void addTraverseDown() {
+	for (PlayerStatistics stats : playerStats) {
+	  if(stats.getPlayerName() == gp.getPuppet().getPuppetName()) {
+	    stats.addDown();
+	  }
+	}
   }
 
 }
