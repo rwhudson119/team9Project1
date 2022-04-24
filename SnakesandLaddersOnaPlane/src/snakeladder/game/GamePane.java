@@ -66,6 +66,7 @@ public class GamePane extends GameGrid
       puppet.setPuppetName("Player " + (i + 1));
       addActor(puppet, startLocation);
       puppets.add(puppet);
+      np.addPlayerStats(puppet.getPuppetName());
     }
   }
 

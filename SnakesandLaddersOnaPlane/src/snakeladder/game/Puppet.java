@@ -178,8 +178,10 @@ public class Puppet extends Actor
           y = gamePane.toPoint(currentCon.locStart).y;
           if (currentCon.locEnd.y > currentCon.locStart.y)
             dy = gamePane.animationStep;
+          	navigationPane.addTraverseUp();
           else {
             dy = -gamePane.animationStep;
+            navigationPane.addTraverseDown()
           }
           if (currentCon instanceof Snake)
           {
