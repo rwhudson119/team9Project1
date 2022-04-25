@@ -22,25 +22,24 @@ public class NavigationPane extends GameGrid
         roll(getDieValue());
         delay(1000);
         handBtn.show(0);
-        if(shouldToggle()) {
-          isToggle = !isToggle;
-          toggleCheck.setChecked(isToggle);
-          gp.swapConnections();
-        }
       }
     }
     boolean shouldToggle() {
       int optimal = 0;
       java.util.List<Puppet> puppets = gp.getAllPuppets();
+      // iterates over other puppets
       for(int i=0;i<gp.getNumberOfPlayers();i++) {
         if(puppets.get(i) == gp.getPuppet()){
           continue;
         }
+        // gets new puppet index and iterates over the possible squares the puppet can land on.
         int currIndex = puppets.get(i).getCellIndex();
         for(int j=1;j<=numberOfDice*6 && j+currIndex<100;j++) {
           Location loc = new Location((currIndex+j)%10, (currIndex+j)/10);
           Connection connection = gp.getConnectionAt(loc);
+          // no connection or is the end of connection
           if(connection == null || connection.locStart != loc) { continue; }
+          // increments when an upwards connection is found, vice versa
           if(connection.locEnd.getY() < connection.locStart.getY()) {
             optimal++;
           } else {
@@ -309,14 +308,19 @@ public class NavigationPane extends GameGrid
       gamePlayCallback.finishGameWithResults(nbRolls % gp.getNumberOfPlayers(), playerPositions);
       gp.resetAllPuppets();
     }
-    else
+    else if(gp.getPuppet().getTurnSteps() != -1 )  // ensures turn isn't switched
     {
+      if(gp.getPuppet().isAuto() && new SimulatedPlayer().shouldToggle()) {
+        // swaps isToggle bool and swaps button on board
+        isToggle = !isToggle;
+        toggleCheck.setChecked(isToggle);
+        gp.swapConnections();
+      }
       playSound(GGSound.CLICK);
       showStatus("Done. Click the hand!");
       String result = gp.getPuppet().getPuppetName() + " - pos: " + currentIndex;
       showResult(result);
       gp.switchToNextPuppet();
-      // System.out.println("current puppet - auto: " + gp.getPuppet().getPuppetName() + "  " + gp.getPuppet().isAuto() );
 
       if (isAuto) {
         Monitor.wakeUp();

@@ -62,6 +62,8 @@ public class Puppet extends Actor
     return cellIndex;
   }
 
+  int getTurnSteps() { return turnSteps; }
+
   private void moveToNextCell()
   {
     int tens = cellIndex / 10;
@@ -85,8 +87,9 @@ public class Puppet extends Actor
 
   private void collisionDetect() {
     List<Puppet> puppets = gamePane.getAllPuppets();
+    // iterates over all other players and checks if they share an index greater than 1.
     for (int i=0;i<gamePane.getNumberOfPlayers();i++) {
-      if(puppets.get(i) != this && puppets.get(i).getCellIndex() == cellIndex && cellIndex > 1) {
+      if(cellIndex > 1 && puppets.get(i) != this && puppets.get(i).getCellIndex() == cellIndex) {
         puppets.get(i).go(-1);
       }
     }
@@ -170,9 +173,9 @@ public class Puppet extends Actor
     if (nbSteps == 0)
       {
         collisionDetect();
-        // Check if on connection start
+        // Check if on connection start and either roll is not minimum or connection is upwards.
         if ((currentCon = gamePane.getConnectionAt(getLocation())) != null
-            && (turnSteps > navigationPane.getNumberOfDice() || currentCon.locEnd.y < currentCon.locStart.y))
+            && (turnSteps != navigationPane.getNumberOfDice() || currentCon.locEnd.y < currentCon.locStart.y))
         {
           gamePane.setSimulationPeriod(50);
           y = gamePane.toPoint(currentCon.locStart).y;
@@ -197,7 +200,7 @@ public class Puppet extends Actor
         }
         else
         {
-          currentCon = null;
+          currentCon = null; // removes connection because it should not be used this turn.
           setActEnabled(false);
           navigationPane.prepareRoll(cellIndex);
         }
