@@ -205,10 +205,10 @@ public class NavigationPane extends GameGrid
     if (dieValues == null) {
       return RANDOM_ROLL_TAG;
     }
-    int currentRound = nbRolls / gp.getNumberOfPlayers();
-    int playerIndex = nbRolls % gp.getNumberOfPlayers();
+    int currentRound = nbRolls / (gp.getNumberOfPlayers()*numberOfDice);
+    int playerIndex = (nbRolls / numberOfDice) % gp.getNumberOfPlayers();
     if (dieValues.get(playerIndex).size() > currentRound) {
-      return dieValues.get(playerIndex).get(currentRound);
+      return dieValues.get(playerIndex).get(numberOfDice*currentRound+currRoll);
     }
     return RANDOM_ROLL_TAG;
   }
