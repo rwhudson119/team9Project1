@@ -46,10 +46,17 @@ public class Puppet extends Actor
     {
       cellIndex = 0;
       setLocation(gamePane.startLocation);
+    } else {
+      this.nbSteps = nbSteps;
+      this.turnSteps = nbSteps;
+      setActEnabled(true);
     }
-    this.nbSteps = nbSteps;
-    this.turnSteps = nbSteps;
-    setActEnabled(true);
+  }
+  
+  void go() {
+	  this.nbSteps = 0;
+	  this.turnSteps = 0;
+	  moveToPrevCell();
   }
 
   void resetToStartingPoint() {
@@ -90,7 +97,7 @@ public class Puppet extends Actor
     // iterates over all other players and checks if they share an index greater than 1.
     for (int i=0;i<gamePane.getNumberOfPlayers();i++) {
       if(cellIndex > 1 && puppets.get(i) != this && puppets.get(i).getCellIndex() == cellIndex) {
-        puppets.get(i).go(-1);
+        puppets.get(i).go();
       }
     }
   }
@@ -117,6 +124,7 @@ public class Puppet extends Actor
       }
     }
     cellIndex--;
+    setActEnabled(true);
   }
 
   public void act()
@@ -166,10 +174,7 @@ public class Puppet extends Actor
       }
 
       nbSteps--;
-    } else if (nbSteps == -1) {
-      moveToPrevCell(); //moves puppet back once, yet to be implemented.
-      nbSteps = 0; //sets nbSteps to 0 so act() can check rules of square.
-    }
+    } 
     if (nbSteps == 0)
       {
         collisionDetect();

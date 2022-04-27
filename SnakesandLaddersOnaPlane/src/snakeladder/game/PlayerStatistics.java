@@ -34,7 +34,7 @@ public class PlayerStatistics {
 		return playerName;
 	}
 	
-	public void printStatistics() {
+	private void printRolls() {
 		int arrayLength = 6*this.numberOfDice - this.numberOfDice + 1;
 		int[] rollTotals = new int[arrayLength];
 		for(int i = 0;i<arrayLength;i++) {
@@ -51,7 +51,16 @@ public class PlayerStatistics {
 			counter++;
 		}
 		System.out.print("\n");
+	}
+	
+	private void printTraversal() {
 		System.out.println(playerName + " traversed: up-"+ traverseUp +", down-" + traverseDown);
+	}
+	
+	public void printStatistics() {
+		printRolls();
+		printTraversal();
+		
 	}
 
 }
