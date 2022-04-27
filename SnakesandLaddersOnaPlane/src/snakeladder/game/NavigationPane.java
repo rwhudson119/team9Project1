@@ -13,7 +13,7 @@ import java.util.Properties;
 public class NavigationPane extends GameGrid
   implements GGButtonListener
 {
-  private class SimulatedPlayer extends Thread
+  private class SimulatedPlayer extends Thread implements DecisionMaking
   {
     public void run() {
       while (true) {
@@ -24,30 +24,31 @@ public class NavigationPane extends GameGrid
         handBtn.show(0);
       }
     }
-    boolean shouldToggle() {
-      int optimal = 0;
+    // default shouldToggle method can be overridden by potential child classes
+    public boolean shouldToggle() {
+      int upwards = 0, downwards = 0;
       java.util.List<Puppet> puppets = gp.getAllPuppets();
       // iterates over other puppets
-      for(int i=0;i<gp.getNumberOfPlayers();i++) {
-        if(puppets.get(i) == gp.getPuppet()){
+      for(Puppet puppet : puppets) {
+        if(puppet == gp.getPuppet()){
           continue;
         }
         // gets new puppet index and iterates over the possible squares the puppet can land on.
-        int currIndex = puppets.get(i).getCellIndex();
+        int currIndex = puppet.getCellIndex();
         for(int j=1;j<=numberOfDice*6 && j+currIndex<100;j++) {
-          Location loc = new Location((currIndex+j)%10, (currIndex+j)/10);
+          Location loc = gp.cellToLocation(currIndex+j);
           Connection connection = gp.getConnectionAt(loc);
           // no connection or is the end of connection
-          if(connection == null || connection.locStart != loc) { continue; }
+          if(connection == null) { continue; }
           // increments when an upwards connection is found, vice versa
           if(connection.locEnd.getY() < connection.locStart.getY()) {
-            optimal++;
+            downwards++;
           } else {
-            optimal--;
+            upwards++;
           }
         }
       }
-      return optimal >= 0;
+      return (upwards >= downwards);
     }
   }
 
@@ -290,6 +291,9 @@ public class NavigationPane extends GameGrid
 
   void prepareRoll(int currentIndex)
   {
+    if(gp.getAllPuppets().isEmpty()) {
+      return;
+    }
     if (currentIndex == 100)  // Game over
     {
       playSound(GGSound.FADE);
@@ -308,7 +312,7 @@ public class NavigationPane extends GameGrid
       gamePlayCallback.finishGameWithResults(nbRolls % gp.getNumberOfPlayers(), playerPositions);
       gp.resetAllPuppets();
     }
-    else if(gp.getPuppet().getTurnSteps() != -1 )  // ensures turn isn't switched
+    else if(gp.getPuppet().getTurnSteps() != -1)  // ensures turn isn't switched after being pushed back
     {
       if(gp.getPuppet().isAuto() && new SimulatedPlayer().shouldToggle()) {
         // swaps isToggle bool and swaps button on board

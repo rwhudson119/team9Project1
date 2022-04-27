@@ -85,16 +85,6 @@ public class Puppet extends Actor
     cellIndex++;
   }
 
-  private void collisionDetect() {
-    List<Puppet> puppets = gamePane.getAllPuppets();
-    // iterates over all other players and checks if they share an index greater than 1.
-    for (int i=0;i<gamePane.getNumberOfPlayers();i++) {
-      if(cellIndex > 1 && puppets.get(i) != this && puppets.get(i).getCellIndex() == cellIndex) {
-        puppets.get(i).go(-1);
-      }
-    }
-  }
-
   private void moveToPrevCell() {
     int tens = cellIndex / 10;
     int ones = cellIndex - tens * 10;
@@ -172,7 +162,7 @@ public class Puppet extends Actor
     }
     if (nbSteps == 0)
       {
-        collisionDetect();
+        gamePane.collisionDetect(cellIndex);
         // Check if on connection start and either roll is not minimum or connection is upwards.
         if ((currentCon = gamePane.getConnectionAt(getLocation())) != null
             && (turnSteps != navigationPane.getNumberOfDice() || currentCon.locEnd.y < currentCon.locStart.y))

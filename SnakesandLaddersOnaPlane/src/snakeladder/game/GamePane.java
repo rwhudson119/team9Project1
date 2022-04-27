@@ -131,6 +131,15 @@ public class GamePane extends GameGrid
     return (int)(a * y + b);
   }
 
+  public void collisionDetect(int cellIndex) {
+    // iterates over all other players and checks if they share an index greater than 1.
+    for (Puppet puppet : puppets) {
+      if(cellIndex > 1 && puppet != getPuppet() && puppet.getCellIndex() == cellIndex) {
+        puppet.go(-1);
+      }
+    }
+  }
+
   public void swapConnections() {
     for(int i=0;i<connections.size();i++) {
       Connection currConnection = connections.get(i);
